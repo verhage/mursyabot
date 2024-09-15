@@ -43,19 +43,22 @@ public class BotEngine {
 
     public String handleMessage(@NonNull final Message message) {
         final Chat chat = chats.computeIfAbsent(message.getChatId(), this::newChat);
-
         final Event event = new Event(message.getText());
+
+        String response = processEvent(chat, event);
+        if (response == null) {
+            log.info("Event processing error, null response reached");
+            response = resetChat(chat);
+        }
+        return response;
+    }
+
+    private String processEvent(Chat chat, Event event) {
         final State toState = findTransition(chat.getCurrentState(), event)
                 .map(Transition::toState)
                 .map(stateMap::get).orElse(null);
 
-        if (toState != null) {
-            return chat.enter(toState).message();
-        }
-
-        log.info("Unsupported transition");
-
-        return chat.getCurrentState().message();
+        return toState != null ? chat.enter(toState).message() : chat.getCurrentState().message();
     }
 
     private Optional<Transition> findTransition(State currentState, Event event) {
@@ -63,8 +66,15 @@ public class BotEngine {
     }
 
     private Chat newChat(Long id) {
+        log.info("Starting new chat");
         Chat chat = new Chat(id);
         chat.enter(NULL_STATE);
         return chat;
+    }
+
+    private String resetChat(Chat chat) {
+        log.info("Resetting chat to initial state");
+        chat.enter(NULL_STATE);
+        return processEvent(chat, START);
     }
 }
