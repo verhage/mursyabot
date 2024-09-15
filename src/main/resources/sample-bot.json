@@ -1,0 +1,51 @@
+{
+  "states": [
+    {
+      "name": "Start",
+      "message": "Welcome to the bot!"
+    },
+    {
+      "name": "Hello",
+      "message": "Hello to you :)"
+    },
+    {
+      "name": "Test",
+      "message": "This is a test"
+    },
+    {
+      "name": "Goodbye",
+      "message": "Goodbye and have a nice day!"
+    }
+  ],
+  "transitions": [
+    {
+      "fromState": "Start",
+      "toState": "Hello",
+      "event": {
+        "name": "hi"
+      }
+    },
+    {
+      "fromState": "Hello",
+      "toState": "Goodbye",
+      "event": {
+        "name": "bye"
+      }
+    },
+    {
+      "fromState": "Hello",
+      "toState": "Test",
+      "event": {
+        "name": "test"
+      }
+    },
+    {
+      "fromState": "Test",
+      "toState": "Goodbye",
+      "event": {
+        "name": "bye"
+      }
+    }
+  ],
+  "initialState": "Start"
+}
