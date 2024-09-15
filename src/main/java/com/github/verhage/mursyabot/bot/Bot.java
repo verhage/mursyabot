@@ -3,6 +3,7 @@ package com.github.verhage.mursyabot.bot;
 import com.github.verhage.mursyabot.bot.config.BotConfig;
 import com.github.verhage.mursyabot.bot.engine.BotEngine;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -27,10 +28,13 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        log.info("Received: {}", update.getMessage().getText());
-
-        String response = engine.handleMessage(update.getMessage());
-        reply(update.getMessage(), response);
+        try {
+            setupMdc(update);
+            String response = engine.handleMessage(update.getMessage());
+            reply(update.getMessage(), response);
+        } finally {
+            MDC.clear();
+        }
     }
 
     @Override
@@ -48,5 +52,10 @@ public class Bot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void setupMdc(Update update) {
+        MDC.put("bot", properties.getName());
+        MDC.put("chatId", String.valueOf(update.getMessage().getChatId()));
     }
 }
