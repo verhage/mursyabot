@@ -8,7 +8,9 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,24 +43,27 @@ public class BotEngine {
         }
     }
 
-    public String handleMessage(@NonNull final Message message) {
+    public List<String> handleMessage(@NonNull final Message message) {
         final Chat chat = chats.computeIfAbsent(message.getChatId(), this::newChat);
         final Event event = new Event(message.getText());
 
-        String response = processEvent(chat, event);
-        if (response == null) {
+        List<String> responses = new ArrayList<>();
+        processEvent(chat, event).ifPresent(responses::add);
+        if (responses.isEmpty()) {
             log.info("Event processing error, null response reached");
-            response = resetChat(chat);
+            responses.add("I don't know what you mean, let's start over");
+            responses.add(resetChat(chat));
         }
-        return response;
+        return responses;
     }
 
-    private String processEvent(Chat chat, Event event) {
+    private Optional<String> processEvent(Chat chat, Event event) {
         final State toState = findTransition(chat.getCurrentState(), event)
                 .map(Transition::toState)
                 .map(stateMap::get).orElse(null);
 
-        return toState != null ? chat.enter(toState).message() : chat.getCurrentState().message();
+        String response = toState != null ? chat.enter(toState).message() : chat.getCurrentState().message();
+        return Optional.ofNullable(response);
     }
 
     private Optional<Transition> findTransition(State currentState, Event event) {
@@ -75,6 +80,6 @@ public class BotEngine {
     private String resetChat(Chat chat) {
         log.info("Resetting chat to initial state");
         chat.enter(NULL_STATE);
-        return processEvent(chat, START);
+        return processEvent(chat, START).orElseThrow();
     }
 }

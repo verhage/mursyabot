@@ -30,8 +30,7 @@ public class Bot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         try {
             setupMdc(update);
-            String response = engine.handleMessage(update.getMessage());
-            reply(update.getMessage(), response);
+            engine.handleMessage(update.getMessage()).forEach(response -> respond(update.getMessage(), response));
         } finally {
             MDC.clear();
         }
@@ -42,7 +41,7 @@ public class Bot extends TelegramLongPollingBot {
         return properties.getName();
     }
 
-    private void reply(Message message, String response) {
+    private void respond(Message message, String response) {
         SendMessage sendMessage = SendMessage.builder()
                 .chatId(message.getChatId())
                 .text(response)
