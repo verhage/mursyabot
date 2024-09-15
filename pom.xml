@@ -17,6 +17,8 @@
 
 	<properties>
 		<java.version>21</java.version>
+
+		<version.telegrambots>6.9.7.1</version.telegrambots>
 	</properties>
 
 	<dependencies>
@@ -29,6 +31,11 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.telegram</groupId>
+			<artifactId>telegrambots</artifactId>
+			<version>${version.telegrambots}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
