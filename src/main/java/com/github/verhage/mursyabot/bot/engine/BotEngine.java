@@ -53,7 +53,9 @@ public class BotEngine {
             return chat.enter(toState).message();
         }
 
-        return "I don't know what you mean";
+        log.info("Unsupported transition");
+
+        return chat.getCurrentState().message();
     }
 
     private Optional<Transition> findTransition(State currentState, Event event) {
